@@ -1,0 +1,35 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: manager-actor
+  namespace: k8stest
+spec:
+  selector:
+    app: manager
+  ports:
+  - protocol: TCP
+    port: 30000
+    targetPort: manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: manager
+  namespace: k8stest
+spec:
+  selector:
+    matchLabels:
+      app: manager
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: manager
+    spec:
+      containers:
+      - name: manager
+        image: <your-docker-username>/k8stest-manager
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 6000
+          name: manager
