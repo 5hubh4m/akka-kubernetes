@@ -1,23 +1,18 @@
 #!/usr/bin/env bash
 
-export APP_VERSION=0.1
-export DOCKER_USERNAME=$1
-
-echo "=== Please execute this from the main project directory!!! ==="
+echo '=== Please execute this from the main project directory!!! ==='
 
 echo '=== Building jar ==='
 sbt assembly
 
 echo '=== Copying jars ==='
-cp target/scala-2.12/K8STest-assembly-"$APP_VERSION".jar deploy/Client/
+cp target/scala-2.12/K8STest-assembly-0.1.jar deploy/docker/
 
 echo '=== Building docker images ==='
-docker build -t "$DOCKER_USERNAME"/k8s-client deploy/Client/
-docker build -t "$DOCKER_USERNAME"/k8stest-manager deploy/Manager/
+docker build -t "$1"/k8stest deploy/docker/
 
 echo '=== Cleaning up ==='
-rm deploy/Client/K8STest-assembly-"$APP_VERSION".jar
+rm deploy/docker/K8STest-assembly-0.1.jar
 
 echo '=== Pushing docker images ==='
-docker push "$DOCKER_USERNAME"/k8s-client
-docker push "$DOCKER_USERNAME"/k8stest-manager
+docker push "$1"/k8stest

@@ -5,7 +5,7 @@ It's a simple project that explains how to configure deployments/jobs/services t
 ### Implementation
 
 * A `ClientActor` and a `ManagerActor` listen on port `6000` on their respective machines in their own pods.
-* Services `client-actor` and `manager-actor` to assign and route packets to correct ports.
+* Services `manager-actor` to make the IP and port of the `ManagerActor` visible and accessible to `ClientActor`.
 * Kubernetes API calls to get the service details and setup `ActorSystem` properly.
 * Code and configuration for bringing it all together.
 
@@ -17,8 +17,9 @@ It's a simple project that explains how to configure deployments/jobs/services t
 ### Running the example
 
 * `cd` to the project root.
-* Run `bash deploy/build_dockerfiles.sh <your-docker-username>` from the project root. This will build the docker images and push them on the hub.
-* Edit the files `job+service_k8stest-client.yaml` and `deployment+service_k8stest-manager.yaml` and replace `<your-docker-username>` with your actual username.
+* Edit files `deploy/k8s/deployment+service_k8stest-manager.yaml` and `deploy/k8s/job_k8stest-client.yaml` and replace `<your-docker-hub-username>` with your actual username. Or just use mine (`5hubh4m`) for the prebuilt docker image!
+* Run `bash deploy/build_dockerfiles.sh <your-docker-hub-username>` from the project root. This will build the docker images and push them on the hub. Optionally, if you only want to run the vanilla images, skip this step and just get the docker images on my docker hub, as mentioned in the previous step.
 * Deploy the namespace with `kubectl create -f deploy/k8s/namespace_k8stest.yaml`, the manager deployment and service with `kubectl create -f deployment+service_k8stest-manager.yaml`.
-* Finally, deploy the client job and service with `kubectl create -f job+service_k8stest-client.yaml`.
+* Finally, deploy the client job with `kubectl create -f job_k8stest-client.yaml`.
 * Check the manager logs with `kubectl --namespace=k8stest logs <manager-pod-id>`. It should show a `"Hello"` message received from client.
+* Check the client logs with `kubectl --namespace=k8stest logs <client-pod-id>`. It should show a `"Success..."` on receiving an `Exit` message from manager.

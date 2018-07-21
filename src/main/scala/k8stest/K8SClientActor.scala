@@ -18,7 +18,9 @@ class K8SClientActor(managerActor: ActorRef) extends Actor {
   }
 
   override def receive: Receive = {
-    case Exit => context.system.terminate
+    case Exit =>
+      println("Successfully received a message from the manager. Bi-directional communication works. Exiting...")
+      context.system.terminate
     case x => println(x)
   }
 
@@ -39,27 +41,16 @@ object K8SClientActor extends App {
   val managerIP = managerService.getSpec.getClusterIP
   val managerPort = managerService.getSpec.getPorts.get(0).getPort
 
-  val myService = coreApi.readNamespacedService("client-actor", "k8stest", "true", null, null)
-
-  val myIp = myService.getSpec.getClusterIP
-  val myPort = myService.getSpec.getPorts.get(0).getPort
-
-  println("Gathered the following details:", managerIP, managerPort, myIp, myPort)
+  println("Gathered the following details:", managerIP, managerPort)
 
   val system = ActorSystem(
     "K8STestActorSystem",
     ConfigFactory.load.withValue(
-      "akka.remote.netty.tcp.bind-hostname",
+      "akka.remote.netty.tcp.hostname",
       ConfigValueFactory.fromAnyRef("0.0.0.0")
     ).withValue(
-      "akka.remote.netty.tcp.bind-port",
-      ConfigValueFactory.fromAnyRef(6000)
-    ).withValue(
-      "akka.remote.netty.tcp.hostname",
-      ConfigValueFactory.fromAnyRef(myIp)
-    ).withValue(
       "akka.remote.netty.tcp.port",
-      ConfigValueFactory.fromAnyRef(myPort)
+      ConfigValueFactory.fromAnyRef(6000)
     )
   )
 
@@ -70,23 +61,6 @@ object K8SClientActor extends App {
   ).resolveOne(5 seconds).onComplete {
     case Success(managerActor) => system.actorOf(Props(classOf[K8SClientActor], managerActor), "K8STestClientActor")
     case Failure(e) => e.printStackTrace()
-  }
-
-  system.whenTerminated.onComplete {_ =>
-    coreApi.deleteNamespacedService(
-      "client-actor",
-      "k8stest",
-      new V1DeleteOptions()
-        .apiVersion("v1")
-        .kind("DeleteOptions")
-        .gracePeriodSeconds(0.toLong)
-        .propagationPolicy("Background")
-      ,
-      "true",
-      null,
-      null,
-      null
-    )
   }
 
 }

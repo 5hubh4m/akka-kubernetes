@@ -28,7 +28,9 @@ spec:
     spec:
       containers:
       - name: manager
-        image: <your-docker-username>/k8stest-manager
+        image: <your-docker-hub-username>/k8stest
+        command: ["/usr/bin/java"]
+        args: ["-cp", "/app/K8STest-assembly-0.1.jar", "k8stest.K8SManagerActor"]
         imagePullPolicy: Always
         ports:
         - containerPort: 6000

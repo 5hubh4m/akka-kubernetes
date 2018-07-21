@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: client
+  namespace: k8stest
+spec:
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      containers:
+      - name: client
+        image: <your-docker-hub-username>/k8stest
+        command: ["/usr/bin/java"]
+        args: ["-cp", "/app/K8STest-assembly-0.1.jar", "k8stest.K8SClientActor"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 6000
+          name: client
+      restartPolicy: Never
